@@ -8,8 +8,8 @@ Pages:
 - contact.html — Contact form
 
 Shared assets:
-- style.css
-- script.js
+- styles.css
+- main.js
 
 Features:
 - Responsive multi-page navigation
