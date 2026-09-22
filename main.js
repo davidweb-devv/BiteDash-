@@ -27,13 +27,38 @@ if (themeBtn) themeBtn.addEventListener("click", () => {
 });
 
 // Menu Filters
-const filters = document.querySelectorAll(".filter"), cards = document.querySelectorAll(".food-card");
+const filters = document.querySelectorAll(".filter");
+const cards = document.querySelectorAll(".food-card");
+
 filters.forEach(filter => filter.addEventListener("click", () => {
     filters.forEach(f => f.classList.remove("active"));
     filter.classList.add("active");
     const category = filter.dataset.filter;
-    cards.forEach(card => card.style.display = category === "all" || card.dataset.category === category ? "block" : "none");
+
+    cards.forEach(card => {
+        const matches = category === "all" || card.dataset.category === category;
+        
+        if (matches) {
+            card.style.display = "block";
+            // Tiny delay to allow display change before triggering fade/scale in
+            setTimeout(() => {
+                card.style.opacity = "1";
+                card.style.transform = "scale(1)";
+            }, 10);
+        } else {
+            // Fade out and scale down first
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.92)";
+            // Hide completely after the transition finishes
+            setTimeout(() => {
+                if (card.style.opacity === "0") {
+                    card.style.display = "none";
+                }
+            }, 300);
+        }
+    });
 }));
+
 
 // Cart Functionality
 let cart = JSON.parse(localStorage.getItem("bitedash-cart") || "[]");
@@ -72,21 +97,25 @@ document.querySelector("#nextReview")?.addEventListener("click", () => { reviewI
 document.querySelector("#prevReview")?.addEventListener("click", () => { reviewIndex = (reviewIndex - 1 + reviews.length) % reviews.length; showReview(reviewIndex); });
 document.querySelector("#contactForm")?.addEventListener("submit", e => { e.preventDefault(); alert("Thanks! This demo form is ready to connect to a real email/API service."); e.target.reset(); });
 
-// Smooth Page Transitions
+// Smooth page fade-in on load
 document.addEventListener("DOMContentLoaded", () => {
-    document.body.style.opacity = "1";
-    document.body.style.transition = "opacity 0.35s ease-in-out";
+    // Small timeout ensures the browser registers the initial 0 opacity before fading to 1
+    requestAnimationFrame(() => {
+        document.body.style.opacity = "1";
+    });
 });
 
+// Smooth page fade-out when clicking any internal link or button link
 document.querySelectorAll("a").forEach(link => {
     const href = link.getAttribute("href");
-    if (href && href.endsWith(".html") && !href.startsWith("http")) {
+    // Target any relative internal .html link, ignoring anchors (#) or external links
+    if (href && href.endsWith(".html") && !href.startsWith("http") && !href.startsWith("#")) {
         link.addEventListener("click", e => {
             e.preventDefault();
             document.body.style.opacity = "0";
             setTimeout(() => {
                 window.location.href = href;
-            }, 350);
+            }, 350); // Matches the CSS transition duration
         });
     }
 });
